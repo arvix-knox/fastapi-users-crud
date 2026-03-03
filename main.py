@@ -10,7 +10,7 @@ from database import (
     engine,
 )
 from models import User
-from schemas import UserCreate, UserResponse
+from schemas import UserCreate, UserResponse, UserUpdate
 
 
 app = FastAPI(title="FastAPI Learning")
@@ -58,3 +58,26 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
     
+@app.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: int, user_update: UserUpdate, db: AsyncSession = Depends(get_db)):
+    query = select(User).where(User.id == user_id)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    if user is  None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.name = user_update.name
+    user.hobbies = user_update.hobbies
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    query = select(User).where(User.id == user_id)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    if user is  None:
+        raise HTTPException(status_code=404, detail="User not found")
+    await db.delete(user)
+    await db.commit()
+    return {"message": f"User with id {user_id} deleted successfully"}
