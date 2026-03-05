@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+
 
 from database import (
     AsyncSessionLocal,
@@ -54,7 +54,7 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
-    if user is  None:
+    if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
     
@@ -63,7 +63,7 @@ async def update_user(user_id: int, user_update: UserUpdate, db: AsyncSession = 
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
-    if user is  None:
+    if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     user.name = user_update.name
     user.hobbies = user_update.hobbies
@@ -76,7 +76,7 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
-    if user is  None:
+    if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     await db.delete(user)
     await db.commit()
